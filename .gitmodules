@@ -1,0 +1,3 @@
+[submodule "nifi-release-tools"]
+	path = nifi-release-tools
+	url = https://github.com/adam-markovics/nifi-release-tools.git

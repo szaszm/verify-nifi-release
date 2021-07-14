@@ -1,0 +1,7 @@
+# Example
+    ./verify_minifi_cpp_release.sh minifi-cpp-0.10.0-RC2 60d5bc70b567fa7c6689f313a75be17fe7c94080 484d3196d087e7c1acb5d703b827929edf0d8dae295878e1f79232ab8de4fd358f12fa223201c92e0cd9e0c59f2314da9001ac12eb91eabeda751e5d46c4f6b7
+    ./verify_nifi_release.sh nifi-1.14.0-RC2 fcbf1d5f975dd984e34f3a543b9480c779b0dc2f 2d23b1a2fae9f545f665c4ee5d9723cdf9c68a62a26d80287b96a55773594e1e80f689ec0f00ba74af92df164c6f4df73ac9b91db7678aaefd69ee8f1eed3f42
+
+# Caveats
+
+The tools don't test the resulting binaries.
