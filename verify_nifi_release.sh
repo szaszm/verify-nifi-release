@@ -29,12 +29,12 @@ wget -q -O KEYS-dev "$DIST_URL/dev/nifi/KEYS" && gpg --import KEYS-dev &>/dev/nu
 rm KEYS-dev
 
 RC_PARENT_DIR_URL="$DIST_URL/dev/nifi"
-RC_DIR="$(svn ls "$RC_PARENT_DIR_URL" | grep -E '[0-9]+\.[0-9]+\.[0-9]+' | tail -1)"
+RC_DIR="$(svn ls "$RC_PARENT_DIR_URL" | grep -E '[0-9]+\.[0-9]+\.[0-9]+' | tail -1 | sed -r -e 's%/$%%')"
 [ -z "$RC_DIR" ] && echo -e "${TERM_BGRED}Missing RC directory${TERM_RESET}, check $RC_PARENT_DIR_URL" 1>&2 && exit 1
-RC_VERSION="$(echo "${RC_DIR}" | sed -r 's%/$%%')"
+RC_VERSION="$(echo "${RC_DIR}" | sed -r 's/^nifi-//g')"
 
 TARBALL_NAME="nifi-$RC_VERSION-source-release.zip"
-SOURCE_URL="$RC_PARENT_DIR_URL/$RC_VERSION/$TARBALL_NAME"
+SOURCE_URL="$RC_PARENT_DIR_URL/$RC_DIR/$TARBALL_NAME"
 echo Downloading release candidate
 set -x
 wget -q "$SOURCE_URL"
