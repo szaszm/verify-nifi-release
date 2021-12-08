@@ -40,27 +40,31 @@ echo Downloading release candidate
 set -x
 wget -q "$SOURCE_URL"
 wget -q "$SOURCE_URL.asc"
-wget -q "$SOURCE_URL.sha1"
 wget -q "$SOURCE_URL.sha256"
+wget -q "$SOURCE_URL.sha512"
 set +x
 
 echo Checking checksums
-SOURCE_SHA1="$(sha1sum "$TARBALL_NAME" | cut -d \  -f 1)"
 SOURCE_SHA256="$(sha256sum "$TARBALL_NAME" | cut -d \  -f 1)"
 SOURCE_SHA512="$(sha512sum "$TARBALL_NAME" | cut -d \  -f 1)"
-DOWNLOADED_SHA1="$(cat "$TARBALL_NAME.sha1")"
 DOWNLOADED_SHA256="$(cat "$TARBALL_NAME.sha256")"
+DOWNLOADED_SHA512="$(cat "$TARBALL_NAME.sha512")"
 
-echo -n " SHA1:   (expected) $DOWNLOADED_SHA1 <=> $SOURCE_SHA1 (actual)  = "
-[ -n "$SOURCE_SHA1" -a "$SOURCE_SHA1" = "$DOWNLOADED_SHA1" ] && echo -e ${TERM_BGGREEN}matching${TERM_RESET} || (echo -e ${TERM_BGRED}DIFFERENT${TERM_RESET} && exit 1)
 echo -n " SHA256: (expected) $DOWNLOADED_SHA256 <=> $SOURCE_SHA256 (actual)  = "
 [ -n "$SOURCE_SHA256" -a "$SOURCE_SHA256" = "$DOWNLOADED_SHA256" ] && echo -e ${TERM_BGGREEN}matching${TERM_RESET} || (echo -e ${TERM_BGRED}DIFFERENT${TERM_RESET} && exit 1)
-echo -n " SHA512: (expected) $SHA512 <=> $SOURCE_SHA256 (actual)  = "
+echo -n " SHA512: (expected) $DOWNLOADED_SHA512 <=> $SOURCE_SHA512 (actual)  = "
+[ -n "$SOURCE_SHA512" -a "$SOURCE_SHA512" = "$DOWNLOADED_SHA512" ] && echo -e ${TERM_BGGREEN}matching${TERM_RESET} || (echo -e ${TERM_BGRED}DIFFERENT${TERM_RESET} && exit 1)
+echo -n " SHA512 (email): (expected) $SHA512 <=> $SOURCE_SHA512 (actual)  = "
 [ -n "$SOURCE_SHA512" -a "$SOURCE_SHA512" = "$SHA512" ] && echo -e ${TERM_BGGREEN}matching${TERM_RESET} || (echo -e ${TERM_BGRED}DIFFERENT${TERM_RESET} && exit 1)
 
 echo " gpg --verify $TARBALL_NAME.asc"
 gpg --verify "$TARBALL_NAME.asc"
 echo " GPG returned exit code: $?"
+
+set +e
+echo "Running release-diff-checker..."
+"$RELEASE_DIFF_CHECKER" "$TARBALL_NAME" "$GIT_REPO" "$GIT_TAG"
+set -e
 
 echo -n "Extracting tarball... "
 tar xzf "$TARBALL_NAME"
@@ -70,16 +74,13 @@ README_SIZE="$(wc -c README.md | cut -d \  -f 1)"
 NOTICE_SIZE="$(wc -c NOTICE | cut -d \  -f 1)"
 LICENSE_SIZE="$(wc -c LICENSE | cut -d \  -f 1)"
 [ "$README_SIZE" -gt 28000 -a "$README_SIZE" -lt 35000 ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
-[ "$NOTICE_SIZE" -gt 4000 -a "$NOTICE_SIZE" -lt 4500 ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
+[ "$NOTICE_SIZE" -gt 4500 -a "$NOTICE_SIZE" -lt 6000 ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
 [ "$LICENSE_SIZE" -gt 150000 -a "$LICENSE_SIZE" -lt 160000 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
 popd
 echo done
 
-echo "Running release-diff-checker..."
-"$RELEASE_DIFF_CHECKER" "$TARBALL_NAME" "$GIT_REPO" "$GIT_TAG"
-
 echo "Checking git commit id..."
-git clone --filter=blob:none --no-checkout --single-branch --branch minifi-cpp-0.10.0-RC2 https://github.com/apache/nifi-minifi-cpp.git temp-git-repo &>/dev/null
+git clone --filter=blob:none --no-checkout --single-branch --branch "${GIT_TAG}" https://github.com/apache/nifi-minifi-cpp.git temp-git-repo &>/dev/null
 pushd temp-git-repo &>/dev/null
 GIT_COMMIT_ID_ACTUAL="$(git log | head -1 | cut -d \  -f 2)"
 popd &>/dev/null
@@ -96,17 +97,17 @@ pushd "nifi-minifi-cpp-$RC_VERSION-source"
 time $SCRIPT_DIR/bin/minifi-cpp-build-gcc-ninja.sh
 pushd build-gcc-ninja
 ninja package
-tar xzf nifi-minifi-cpp-$RC_VERSION-bin.tar.gz
+tar xzf nifi-minifi-cpp-$RC_VERSION.tar.gz
 pushd nifi-minifi-cpp-$RC_VERSION
 set +x
 README_SIZE="$(wc -c README.md | cut -d \  -f 1)"
 NOTICE_SIZE="$(wc -c NOTICE | cut -d \  -f 1)"
 LICENSE_SIZE="$(wc -c LICENSE | cut -d \  -f 1)"
 [ "$README_SIZE" -gt 28000 -a "$README_SIZE" -lt 35000 ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
-[ "$NOTICE_SIZE" -gt 4000 -a "$NOTICE_SIZE" -lt 4500 ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
+[ "$NOTICE_SIZE" -gt 4500 -a "$NOTICE_SIZE" -lt 6000 ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
 [ "$LICENSE_SIZE" -gt 150000 -a "$LICENSE_SIZE" -lt 160000 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
 popd
-mv nifi-minifi-cpp-$RC_VERSION-bin.tar.gz ../../nifi-minifi-cpp-$RC_VERSION-bin-gcc.tar.gz
+mv nifi-minifi-cpp-$RC_VERSION.tar.gz ../../nifi-minifi-cpp-$RC_VERSION-gcc.tar.gz
 popd # build-gcc-ninja
 popd # nifi-minifi-cpp-$RC_VERSION-source
 
@@ -119,17 +120,17 @@ pushd "nifi-minifi-cpp-$RC_VERSION-source"
 time $SCRIPT_DIR/bin/minifi-cpp-build-clang-ninja.sh
 pushd build-clang-ninja
 ninja package
-tar xzf nifi-minifi-cpp-$RC_VERSION-bin.tar.gz
+tar xzf nifi-minifi-cpp-$RC_VERSION.tar.gz
 pushd nifi-minifi-cpp-$RC_VERSION
 set +x
 README_SIZE="$(wc -c README.md | cut -d \  -f 1)"
 NOTICE_SIZE="$(wc -c NOTICE | cut -d \  -f 1)"
 LICENSE_SIZE="$(wc -c LICENSE | cut -d \  -f 1)"
 [ "$README_SIZE" -gt 28000 -a "$README_SIZE" -lt 35000 ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
-[ "$NOTICE_SIZE" -gt 4000 -a "$NOTICE_SIZE" -lt 4500 ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
+[ "$NOTICE_SIZE" -gt 4500 -a "$NOTICE_SIZE" -lt 6000 ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
 [ "$LICENSE_SIZE" -gt 150000 -a "$LICENSE_SIZE" -lt 160000 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
 popd
-mv nifi-minifi-cpp-$RC_VERSION-bin.tar.gz ../../nifi-minifi-cpp-$RC_VERSION-bin-clang.tar.gz
+mv nifi-minifi-cpp-$RC_VERSION.tar.gz ../../nifi-minifi-cpp-$RC_VERSION-clang.tar.gz
 popd # build-gcc-ninja
 popd # nifi-minifi-cpp-$RC_VERSION-source
 
