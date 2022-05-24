@@ -70,12 +70,18 @@ echo -n "Extracting tarball... "
 tar xzf "$TARBALL_NAME"
 pushd "nifi-minifi-cpp-$RC_VERSION-source"
 touch .git  # workaround linter bug
+README_LOW=35000
+README_HIGH=50000
+NOTICE_LOW=5000
+NOTICE_HIGH=6000
+LICENSE_LOW=175000
+LICENSE_HIGH=190000
 README_SIZE="$(wc -c README.md | cut -d \  -f 1)"
 NOTICE_SIZE="$(wc -c NOTICE | cut -d \  -f 1)"
 LICENSE_SIZE="$(wc -c LICENSE | cut -d \  -f 1)"
-[ "$README_SIZE" -gt 28000 -a "$README_SIZE" -lt 35000 ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
-[ "$NOTICE_SIZE" -gt 4500 -a "$NOTICE_SIZE" -lt 6000 ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
-[ "$LICENSE_SIZE" -gt 150000 -a "$LICENSE_SIZE" -lt 160000 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
+[ "$README_SIZE" -gt "$README_LOW" -a "$README_SIZE" -lt "$README_HIGH" ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
+[ "$NOTICE_SIZE" -gt "$NOTICE_LOW" -a "$NOTICE_SIZE" -lt "$NOTICE_HIGH" ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
+[ "$LICENSE_SIZE" -gt "$LICENSE_LOW" -a "$LICENSE_SIZE" -lt "$LICENSE_HIGH" ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
 popd
 echo done
 
@@ -103,9 +109,9 @@ set +x
 README_SIZE="$(wc -c README.md | cut -d \  -f 1)"
 NOTICE_SIZE="$(wc -c NOTICE | cut -d \  -f 1)"
 LICENSE_SIZE="$(wc -c LICENSE | cut -d \  -f 1)"
-[ "$README_SIZE" -gt 28000 -a "$README_SIZE" -lt 35000 ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
-[ "$NOTICE_SIZE" -gt 4500 -a "$NOTICE_SIZE" -lt 6000 ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
-[ "$LICENSE_SIZE" -gt 150000 -a "$LICENSE_SIZE" -lt 160000 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
+[ "$README_SIZE" -gt "$README_LOW" -a "$README_SIZE" -lt "$README_HIGH" ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
+[ "$NOTICE_SIZE" -gt "$NOTICE_LOW" -a "$NOTICE_SIZE" -lt "$NOTICE_HIGH" ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
+[ "$LICENSE_SIZE" -gt "$LICENSE_LOW" -a "$LICENSE_SIZE" -lt "$LICENSE_HIGH" ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
 popd
 mv nifi-minifi-cpp-$RC_VERSION.tar.gz ../../nifi-minifi-cpp-$RC_VERSION-gcc.tar.gz
 popd # build-gcc-ninja
@@ -126,9 +132,9 @@ set +x
 README_SIZE="$(wc -c README.md | cut -d \  -f 1)"
 NOTICE_SIZE="$(wc -c NOTICE | cut -d \  -f 1)"
 LICENSE_SIZE="$(wc -c LICENSE | cut -d \  -f 1)"
-[ "$README_SIZE" -gt 28000 -a "$README_SIZE" -lt 35000 ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
-[ "$NOTICE_SIZE" -gt 4500 -a "$NOTICE_SIZE" -lt 6000 ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
-[ "$LICENSE_SIZE" -gt 150000 -a "$LICENSE_SIZE" -lt 160000 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
+[ "$README_SIZE" -gt "$README_LOW" -a "$README_SIZE" -lt "$README_HIGH" ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
+[ "$NOTICE_SIZE" -gt "$NOTICE_LOW" -a "$NOTICE_SIZE" -lt "$NOTICE_HIGH" ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
+[ "$LICENSE_SIZE" -gt "$LICENSE_LOW" -a "$LICENSE_SIZE" -lt "$LICENSE_HIGH" ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
 popd
 mv nifi-minifi-cpp-$RC_VERSION.tar.gz ../../nifi-minifi-cpp-$RC_VERSION-clang.tar.gz
 popd # build-gcc-ninja
