@@ -72,8 +72,8 @@ pushd "nifi-minifi-cpp-$RC_VERSION-source"
 touch .git  # workaround linter bug
 README_LOW=35000
 README_HIGH=50000
-NOTICE_LOW=5000
-NOTICE_HIGH=6000
+NOTICE_LOW=5500
+NOTICE_HIGH=7000
 LICENSE_LOW=175000
 LICENSE_HIGH=190000
 README_SIZE="$(wc -c README.md | cut -d \  -f 1)"
