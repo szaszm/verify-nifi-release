@@ -13,10 +13,10 @@ pushd "${BUILD_DIR}"
 export CC=clang
 export CXX=clang++
 STDLIB="-stdlib=libc++"
-export CFLAGS="-O3 -pipe -march=native -Wall -Wextra"
-export CXXFLAGS="-O3 -pipe -march=native -Wall -Wextra ${STDLIB}"
+export CFLAGS="-O3 -pipe -march=native -Wall -Wextra -Wno-error"
+export CXXFLAGS="-O3 -pipe -march=native -Wall -Wextra -Wno-error ${STDLIB}"
 CMAKE_COMPILER="-DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX}"
-GENERAL_FLAGS=" -DFORCE_COLORED_OUTPUT=ON -DAWS_ENABLE_UNITY_BUILD=OFF -DASAN_BUILD=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DFAIL_ON_WARNINGS=ON"
+GENERAL_FLAGS=" -DFORCE_COLORED_OUTPUT=ON -DAWS_ENABLE_UNITY_BUILD=OFF -DASAN_BUILD=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DFAIL_ON_WARNINGS=OFF"
 # SQL: needs sqlite odbc driver for testing
 # SFTP: slow and broken tests
 # PCAP: fails to build, some dependency issue

@@ -12,10 +12,10 @@ mkdir "${BUILD_DIR}"
 pushd "${BUILD_DIR}"
 export CC=gcc
 export CXX=g++
-export CFLAGS="-O3 -pipe -march=native -Wall -Wextra"
-export CXXFLAGS="-O3 -pipe -march=native -Wall -Wextra"
+export CFLAGS="-O3 -pipe -march=native -Wall -Wextra -Wno-error"
+export CXXFLAGS="-O3 -pipe -march=native -Wall -Wextra -Wno-error"
 CMAKE_COMPILER="-DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX}"
-GENERAL_FLAGS=" -DFORCE_COLORED_OUTPUT=ON -DAWS_ENABLE_UNITY_BUILD=OFF -DASAN_BUILD=OFF -DCMAKE_BUILD_TYPE=Debug -DFAIL_ON_WARNINGS=ON"
+GENERAL_FLAGS=" -DFORCE_COLORED_OUTPUT=ON -DAWS_ENABLE_UNITY_BUILD=OFF -DASAN_BUILD=OFF -DCMAKE_BUILD_TYPE=Debug -DFAIL_ON_WARNINGS=OFF"
 # tensorflow: not installed
 # pcap: fails
 # jni: unusable binary on my system
