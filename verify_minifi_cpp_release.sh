@@ -62,7 +62,7 @@ gpg --verify "$TARBALL_NAME.asc"
 echo " GPG returned exit code: $?"
 
 set +e
-echo "Running release-diff-checker..."
+echo "Running release-diff-checker to diff the source tarball and the git tag..."
 "$RELEASE_DIFF_CHECKER" "$TARBALL_NAME" "$GIT_REPO" "$GIT_TAG"
 set -e
 
