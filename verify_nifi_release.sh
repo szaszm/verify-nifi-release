@@ -72,7 +72,7 @@ LICENSE_SIZE="$(wc -c LICENSE | cut -d \  -f 1)"
 popd # nifi-$RC_VERSION
 echo done
 
-echo "Running release-diff-checker..."
+echo "Running release-diff-checker to diff the source tarball and the git tag..."
 "$RELEASE_DIFF_CHECKER" "$TARBALL_NAME" "$GIT_REPO" "$GIT_TAG"
 
 echo "Checking git commit id..."
