@@ -28,8 +28,11 @@ echo -n Importing dev KEYS...
 wget -q -O KEYS-dev "$DIST_URL/dev/nifi/KEYS" && gpg --import KEYS-dev &>/dev/null && echo -e ${TERM_BGGREEN}done${TERM_RESET} || (echo -e ${TERM_BGRED}failed${TERM_RESET} && exit 1)
 rm KEYS-dev
 
+VERSION="$(echo "${GIT_TAG}" | sed -r -e 's/^nifi-//g' -e 's/-RC[0-9]+$//g')"
+echo version: ${VERSION}
+
 RC_PARENT_DIR_URL="$DIST_URL/dev/nifi"
-RC_DIR="$(svn ls "$RC_PARENT_DIR_URL" | grep -E '[0-9]+\.[0-9]+\.[0-9]+' | tail -1 | sed -r -e 's%/$%%')"
+RC_DIR="$(svn ls "$RC_PARENT_DIR_URL" | grep "${VERSION}" | tail -1 | sed -r -e 's%/$%%')"
 [ -z "$RC_DIR" ] && echo -e "${TERM_BGRED}Missing RC directory${TERM_RESET}, check $RC_PARENT_DIR_URL" 1>&2 && exit 1
 RC_VERSION="$(echo "${RC_DIR}" | sed -r 's/^nifi-//g')"
 
