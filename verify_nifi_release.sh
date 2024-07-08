@@ -24,9 +24,10 @@ pushd "$WORKING_DIR"
 echo -n Importing release KEYS...
 wget -q -O KEYS-release "$DIST_URL/release/nifi/KEYS" && gpg --import KEYS-release &>/dev/null && echo -e  ${TERM_BGGREEN}done${TERM_RESET} || (echo -e ${TERM_BGRED}failed${TERM_RESET} && exit 1)
 rm KEYS-release
-echo -n Importing dev KEYS...
-wget -q -O KEYS-dev "$DIST_URL/dev/nifi/KEYS" && gpg --import KEYS-dev &>/dev/null && echo -e ${TERM_BGGREEN}done${TERM_RESET} || (echo -e ${TERM_BGRED}failed${TERM_RESET} && exit 1)
-rm KEYS-dev
+## dev keys no longer there
+#echo -n Importing dev KEYS...
+#wget -q -O KEYS-dev "$DIST_URL/dev/nifi/KEYS" && gpg --import KEYS-dev &>/dev/null && echo -e ${TERM_BGGREEN}done${TERM_RESET} || (echo -e ${TERM_BGRED}failed${TERM_RESET} && exit 1)
+#rm KEYS-dev
 
 VERSION="$(echo "${GIT_TAG}" | sed -r -e 's/^nifi-//g' -e 's/-RC[0-9]+$//g')"
 echo version: ${VERSION}
