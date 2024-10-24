@@ -43,21 +43,16 @@ echo Downloading release candidate
 set -x
 wget -q "$SOURCE_URL"
 wget -q "$SOURCE_URL.asc"
-wget -q "$SOURCE_URL.sha256"
 wget -q "$SOURCE_URL.sha512"
 set +x
 
 echo Checking checksums
-SOURCE_SHA256="$(sha256sum "$TARBALL_NAME" | cut -d \  -f 1)"
 SOURCE_SHA512="$(sha512sum "$TARBALL_NAME" | cut -d \  -f 1)"
-DOWNLOADED_SHA256="$(cat "$TARBALL_NAME.sha256")"
 DOWNLOADED_SHA512="$(cat "$TARBALL_NAME.sha512")"
 
-echo -n " SHA256: (expected) $DOWNLOADED_SHA256 <=> $SOURCE_SHA256 (actual)  = "
-[ -n "$SOURCE_SHA256" -a "$SOURCE_SHA256" = "$DOWNLOADED_SHA256" ] && echo -e ${TERM_BGGREEN}matching${TERM_RESET} || (echo -e ${TERM_BGRED}DIFFERENT${TERM_RESET} && exit 1)
-echo -n " SHA512: (expected) $DOWNLOADED_SHA512 <=> $SOURCE_SHA512 (actual)  = "
+echo -n "  dist SHA512: (expected) $DOWNLOADED_SHA512 <=> $SOURCE_SHA512 (actual)  = "
 [ -n "$SOURCE_SHA512" -a "$SOURCE_SHA512" = "$DOWNLOADED_SHA512" ] && echo -e ${TERM_BGGREEN}matching${TERM_RESET} || (echo -e ${TERM_BGRED}DIFFERENT${TERM_RESET} && exit 1)
-echo -n " SHA512: (expected) $SHA512 <=> $SOURCE_SHA512 (actual)  = "
+echo -n " email SHA512: (expected) $SHA512 <=> $SOURCE_SHA512 (actual)  = "
 [ -n "$SOURCE_SHA512" -a "$SOURCE_SHA512" = "$SHA512" ] && echo -e ${TERM_BGGREEN}matching${TERM_RESET} || (echo -e ${TERM_BGRED}DIFFERENT${TERM_RESET} && exit 1)
 
 echo " gpg --verify $TARBALL_NAME.asc"
@@ -70,9 +65,21 @@ pushd "nifi-$RC_VERSION"
 README_SIZE="$(wc -c README.md | cut -d \  -f 1)"
 NOTICE_SIZE="$(wc -c NOTICE | cut -d \  -f 1)"
 LICENSE_SIZE="$(wc -c LICENSE | cut -d \  -f 1)"
-[ "$README_SIZE" -gt 16000 -a "$README_SIZE" -lt 20000 ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
-[ "$NOTICE_SIZE" -gt 8000 -a "$NOTICE_SIZE" -lt 10000 ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
-[ "$LICENSE_SIZE" -gt 21000 -a "$LICENSE_SIZE" -lt 25000 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
+
+VERSION_MAJOR="$(echo $VERSION | sed -r -e 's/^([0-9]+)\..*$/\1/')"
+
+if [ "${VERSION_MAJOR}" -eq 1 ]; then
+	[ "$README_SIZE" -gt 16000 -a "$README_SIZE" -lt 20000 ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
+	[ "$NOTICE_SIZE" -gt 8000 -a "$NOTICE_SIZE" -lt 10000 ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
+	[ "$LICENSE_SIZE" -gt 21000 -a "$LICENSE_SIZE" -lt 25000 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
+elif [ "${VERSION_MAJOR}" -eq 2 ]; then
+	[ "$README_SIZE" -gt 10000 -a "$README_SIZE" -lt 12000 ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
+	[ "$NOTICE_SIZE" -gt 6000 -a "$NOTICE_SIZE" -lt 8000 ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
+	[ "$LICENSE_SIZE" -gt 20000 -a "$LICENSE_SIZE" -lt 22000 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
+else
+	echo unknown version 1>&2
+	exit 1
+fi
 popd # nifi-$RC_VERSION
 echo done
 
