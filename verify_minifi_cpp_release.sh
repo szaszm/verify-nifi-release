@@ -25,9 +25,6 @@ pushd "$WORKING_DIR"
 echo -n Importing release KEYS...
 wget -q -O KEYS-release "$DIST_URL/release/nifi/KEYS" && gpg --import KEYS-release &>/dev/null && echo -e  ${TERM_BGGREEN}done${TERM_RESET} || (echo -e ${TERM_BGRED}failed${TERM_RESET} && exit 1)
 rm KEYS-release
-echo -n Importing dev KEYS...
-wget -q -O KEYS-dev "$DIST_URL/dev/nifi/KEYS" && gpg --import KEYS-dev &>/dev/null && echo -e ${TERM_BGGREEN}done${TERM_RESET} || (echo -e ${TERM_BGRED}failed${TERM_RESET} && exit 1)
-rm KEYS-dev
 
 RC_PARENT_DIR_URL="$DIST_URL/dev/nifi/nifi-minifi-cpp"
 RC_DIR="$(svn ls "$RC_PARENT_DIR_URL" | tail -1)"
