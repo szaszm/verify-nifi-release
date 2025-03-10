@@ -110,7 +110,7 @@ NOTICE_SIZE="$(wc -c NOTICE | cut -d \  -f 1)"
 LICENSE_SIZE="$(wc -c LICENSE | cut -d \  -f 1)"
 [ "$README_SIZE" -gt 4000 -a "$README_SIZE" -lt 6000 ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
 [ "$NOTICE_SIZE" -gt 95000 -a "$NOTICE_SIZE" -lt 120000 ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
-[ "$LICENSE_SIZE" -gt 165000 -a "$LICENSE_SIZE" -lt 185000 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
+[ "$LICENSE_SIZE" -gt 150000 -a "$LICENSE_SIZE" -lt 170000 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
 popd # nifi-$RC_VERSION (bin)
 mv nifi-assembly/target/nifi-$RC_VERSION-bin.zip ../
 popd # nifi-$RC_VERSION (src)
