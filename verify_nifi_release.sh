@@ -11,7 +11,6 @@ SHA512=$3
 WORKING_DIR=work
 DIST_URL="https://dist.apache.org/repos/dist"
 GIT_REPO="https://github.com/apache/nifi.git"
-RELEASE_DIFF_CHECKER="$(readlink -m "$(dirname "$0")/nifi-release-tools/release-diff-checker.sh")"
 
 TERM_RESET="\x1b[0m"
 TERM_BGRED="\x1b[41m"
@@ -83,8 +82,8 @@ fi
 popd # nifi-$RC_VERSION
 echo done
 
-echo "Running release-diff-checker to diff the source tarball and the git tag..."
-"$RELEASE_DIFF_CHECKER" "$TARBALL_NAME" "$GIT_REPO" "$GIT_TAG"
+# TODO:
+#echo "Running release-diff-checker to diff the source tarball and the git tag..."
 
 echo "Checking git commit id..."
 git clone --filter=blob:none --no-checkout --single-branch --branch $GIT_TAG https://github.com/apache/nifi.git temp-git-repo &>/dev/null

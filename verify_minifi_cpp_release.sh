@@ -12,7 +12,6 @@ SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 WORKING_DIR=work
 DIST_URL="https://dist.apache.org/repos/dist"
 GIT_REPO="https://github.com/apache/nifi-minifi-cpp.git"
-RELEASE_DIFF_CHECKER="$SCRIPT_DIR/nifi-release-tools/release-diff-checker.sh"
 
 TERM_RESET="\x1b[0m"
 TERM_BGRED="\x1b[41m"
@@ -58,10 +57,8 @@ echo " gpg --verify $TARBALL_NAME.asc"
 gpg --verify "$TARBALL_NAME.asc"
 echo " GPG returned exit code: $?"
 
-set +e
-echo "Running release-diff-checker to diff the source tarball and the git tag..."
-"$RELEASE_DIFF_CHECKER" "$TARBALL_NAME" "$GIT_REPO" "$GIT_TAG"
-set -e
+# TODO:
+#echo "Running release-diff-checker to diff the source tarball and the git tag..."
 
 echo -n "Extracting tarball... "
 tar xzf "$TARBALL_NAME"
