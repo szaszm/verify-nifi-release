@@ -34,7 +34,7 @@ echo "Transitioning to \"Resolved\""
 curl -s -S -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X POST --data "${data}" "https://issues.apache.org/jira/rest/api/2/issue/$jira/transitions"
 echo "  exit code: $?"
 
-fix_version="1.0.0"
+fix_version="0.99.2"
 echo "Setting fix version to $fix_version"
 fix_version_data="{\"update\":{\"fixVersions\":[{\"set\":[{\"name\":\"$fix_version\"}]}]}}"
 curl -s -S -H "Content-Type: application/json" -H "Authorization: Bearer ${access_token}" -X PUT --data "${fix_version_data}" "https://issues.apache.org/jira/rest/api/2/issue/$jira"
