@@ -64,6 +64,5 @@ git rebase --onto main upstream/$base_branch merge-${pull_id} || (echo 'Rebase f
 git checkout main
 git merge --squash --no-commit merge-${pull_id} || cleanup_and_die ${pull_id}
 git branch -D merge-${pull_id}
-#author_name_email="$(git log --format='%an <%ae>' "${base_branch}...${remote}/${branch}" | tail -1)"
-author_name_email="$(git log --format='%an <%ae>' "merge-${pull_id}...${remote}/${branch}" | tail -1)"
+author_name_email="$(git log --format='%an <%ae>' "${base_branch}...${remote}/${branch}" | tail -1)"
 git commit --signoff --gpg-sign --author="$author_name_email" "${message_args[@]}"
