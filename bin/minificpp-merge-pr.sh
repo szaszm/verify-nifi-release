@@ -63,6 +63,6 @@ git pull --rebase
 git rebase --onto main upstream/$base_branch merge-${pull_id} || (echo 'Rebase failed. Starting subshell to resolve conflicts. Run "exit 0" if you successfully finished the rebase, or "exit 1" if you want to abort'; bash) || cleanup_and_die ${pull_id}
 git checkout main
 git merge --squash --no-commit merge-${pull_id} || cleanup_and_die ${pull_id}
+author_name_email="$(git log --format='%an <%ae>' "${base_branch}...merge-${pull_id}" | tail -1)"
 git branch -D merge-${pull_id}
-author_name_email="$(git log --format='%an <%ae>' "${base_branch}...${remote}/${branch}" | tail -1)"
 git commit --signoff --gpg-sign --author="$author_name_email" "${message_args[@]}"
