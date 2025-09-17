@@ -74,7 +74,7 @@ if [ "${VERSION_MAJOR}" -eq 1 ]; then
 elif [ "${VERSION_MAJOR}" -eq 2 ]; then
 	[ "$README_SIZE" -gt 10000 -a "$README_SIZE" -lt 12000 ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
 	[ "$NOTICE_SIZE" -gt 6000 -a "$NOTICE_SIZE" -lt 8000 ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
-	[ "$LICENSE_SIZE" -gt 20000 -a "$LICENSE_SIZE" -lt 22000 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
+	[ "$LICENSE_SIZE" -gt 18000 -a "$LICENSE_SIZE" -lt 20000 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
 else
 	echo unknown version 1>&2
 	exit 1
