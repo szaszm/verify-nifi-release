@@ -84,7 +84,7 @@ read
 echo "Build and test"
 set -x
 pushd "nifi-api-$RC_VERSION"
-./mvnw clean verify
+./mvnw clean install
 unzip target/nifi-api-$RC_VERSION.jar
 set +x
 NOTICE_SIZE="$(wc -c META-INF/NOTICE | cut -d \  -f 1)"
@@ -92,5 +92,17 @@ LICENSE_SIZE="$(wc -c META-INF/LICENSE | cut -d \  -f 1)"
 [ "$NOTICE_SIZE" -gt 130 -a "$NOTICE_SIZE" -lt 190 ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
 [ "$LICENSE_SIZE" -gt 10000 -a "$LICENSE_SIZE" -lt 12500 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
 popd # nifi-api-$RC_VERSION (src)
+
+echo "${TERM_BGGREEN}API build success${TERM_RESET}, building NiFi with the new API version"
+set -x
+git clone --depth=1 https://github.com/apache/nifi.git nifi_repo
+pushd nifi_repo
+sed -ri -e 's%<nifi-api\.version>[0-9]+\.[0-9]+\.[0-9]+</nifi-api\.version>%<nifi-api.version>'"${VERSION}"'</nifi-api.version>%' pom.xml
+git diff
+echo Press enter to continue building NiFi with the new API version
+read
+./mvnw -T 1C clean package -Pcontrib-check #-DskipTests
+set +x
+popd # nifi_repo
 
 popd # WORKING_DIR

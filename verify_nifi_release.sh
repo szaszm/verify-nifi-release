@@ -65,7 +65,8 @@ README_SIZE="$(wc -c README.md | cut -d \  -f 1)"
 NOTICE_SIZE="$(wc -c NOTICE | cut -d \  -f 1)"
 LICENSE_SIZE="$(wc -c LICENSE | cut -d \  -f 1)"
 
-VERSION_MAJOR="$(echo $VERSION | sed -r -e 's/^([0-9]+)\..*$/\1/')"
+VERSION_MAJOR="$(echo $VERSION | cut -d . -f 1)"
+VERSION_MINOR="$(echo $VERSION | cut -d . -f 2)"
 
 if [ "${VERSION_MAJOR}" -eq 1 ]; then
 	[ "$README_SIZE" -gt 16000 -a "$README_SIZE" -lt 20000 ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
@@ -100,7 +101,7 @@ read
 echo "Build and test"
 set -x
 pushd "nifi-$RC_VERSION"
-mvn -T 1C clean package -Pcontrib-check #-DskipTests
+./mvnw -T 1C clean package -Pcontrib-check #-DskipTests
 unzip nifi-assembly/target/nifi-$RC_VERSION-bin.zip
 pushd nifi-$RC_VERSION
 set +x
@@ -109,7 +110,12 @@ NOTICE_SIZE="$(wc -c NOTICE | cut -d \  -f 1)"
 LICENSE_SIZE="$(wc -c LICENSE | cut -d \  -f 1)"
 [ "$README_SIZE" -gt 4000 -a "$README_SIZE" -lt 6000 ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
 [ "$NOTICE_SIZE" -gt 95000 -a "$NOTICE_SIZE" -lt 120000 ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
-[ "$LICENSE_SIZE" -gt 150000 -a "$LICENSE_SIZE" -lt 170000 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
+if [ "${VERSION_MAJOR}" -eq 2 -a "${VERSION_MINOR}" -ge 8 ]; then
+	[ "$LICENSE_SIZE" -gt 135000 -a "$LICENSE_SIZE" -lt 145000 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
+else
+	[ "$LICENSE_SIZE" -gt 150000 -a "$LICENSE_SIZE" -lt 170000 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
+fi
+
 popd # nifi-$RC_VERSION (bin)
 mv nifi-assembly/target/nifi-$RC_VERSION-bin.zip ../
 popd # nifi-$RC_VERSION (src)

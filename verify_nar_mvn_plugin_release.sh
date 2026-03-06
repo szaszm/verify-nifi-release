@@ -87,7 +87,7 @@ rm -rf ${HOME}/.m2/repository
 echo "Build and test"
 set -x
 pushd "nifi-nar-maven-plugin-$RC_VERSION"
-./mvnw clean verify
+./mvnw clean install
 unzip target/nifi-nar-maven-plugin-$RC_VERSION.jar
 set +x
 NOTICE_SIZE="$(wc -c META-INF/NOTICE | cut -d \  -f 1)"
