@@ -20,10 +20,10 @@ pushd "${BUILD_DIR}"
 export CC=gcc
 export CXX=g++
 export CFLAGS="${CFLAGS} -O3 -pipe -march=native -Wall -Wextra -pedantic -Wno-error -Wno-stringop-overflow ${OPT_HARDENED_FLAG}"
-export CXXFLAGS="${CXXFLAGS} -O3 -pipe -march=native -Wall -Wextra -pedantic -Wno-error -Wno-stringop-overflow ${OPT_HARDENED_FLAG}"
+export CXXFLAGS="${CXXFLAGS} -O3 -pipe -march=native -Wall -Wextra -pedantic -Wno-error -Wno-stringop-overflow ${OPT_HARDENED_FLAG} -include cstdint"
 GENERAL_FLAGS=" -DFORCE_COLORED_OUTPUT=ON -DAWS_ENABLE_UNITY_BUILD=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DFAIL_ON_WARNINGS=OFF -DMINIFI_ADVANCED_ASAN_BUILD=OFF -DMINIFI_ADVANCED_LINK_TIME_OPTIMIZATION=ON"
 GENERAL_FLAGS="${GENERAL_FLAGS} -DENABLE_SANDBOX=OFF"  # liblzma requires this with asan enabled. Doesn't affect the library, only the binaries
-EXTENSIONS="-DENABLE_AWS=OFF -DENABLE_COUCHBASE=OFF -DENABLE_GRPC_FOR_LOKI=OFF"
+EXTENSIONS="-DENABLE_AWS=ON -DENABLE_COUCHBASE=ON -DENABLE_GRPC_FOR_LOKI=ON -DENABLE_LUA_SCRIPTING=OFF"
 cmake "-DCMAKE_C_COMPILER=${CC}" "-DCMAKE_CXX_COMPILER=${CXX}" "-DCMAKE_C_FLAGS=${CFLAGS}" "-DCMAKE_CXX_FLAGS=${CXXFLAGS}" ${GENERAL_FLAGS} ${EXTENSIONS} ..
 nice -n 10 make -j$(nproc)
 make -j$(nproc) linter
