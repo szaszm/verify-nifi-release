@@ -18,6 +18,8 @@ cleanup_and_die() {
 
 [ $# -ne 1 ] && usage 1>&2 && exit 1
 
+APACHE_UPSTREAM_REMOTE_NAME=upstream
+
 pull_id=$1
 
 pull_json="$(curl -s -S -H "Accept: application/vnd.github+json" "https://api.github.com/repos/apache/nifi-minifi-cpp/pulls/${pull_id}")"
@@ -28,14 +30,19 @@ title="$(echo "${pull_json}" | jq -r '.title')"
 # modified sed expression to remove trailing blank lines from https://stackoverflow.com/questions/7359527/removing-trailing-starting-newlines-with-sed-awk-tr-and-friends
 body="$(echo "${pull_json}" | jq -r '.body' | sed -e '/^Thank you for submitting a contribution/,$d' -e '/^\s*https:\/\/issues.apache.org\/jira/d' -e '/Depends on https:\/\/github.com/d' | sed -e :a -e '/[^[:blank:]]/,$!d; /^[[:space:]_\-]*$/{ $d; N; ba' -e '}' | sed -e 's/\r//g')"
 base_branch="$(echo "${pull_json}" | jq -r '.base.ref')"
+base_branch_user="$(echo "${pull_json}" | jq -r '.base.user.login')"
+base_branch_remote="${base_branch_user}"
+if [ "${base_branch_user}" = "apache" ]; then
+	base_branch_remote="${APACHE_UPSTREAM_REMOTE_NAME}"
+fi
 
 # assuming remote == author
 remote="${repo_user}"
 if [ "${repo_user}" = "apache" ]; then
-	remote=upstream
+	remote="${APACHE_UPSTREAM_REMOTE_NAME}"
 fi
 
-echo base branch: "$(echo "${pull_json}" | jq -r '.base.ref')"
+echo base branch: "${base_branch_remote}/${base_branch}"
 echo title: "${title}"
 echo repo_user: "${repo_user}"
 echo author: "${author}"
@@ -63,6 +70,6 @@ git pull --rebase
 git rebase --onto main "upstream/${base_branch}" "merge-${pull_id}" || (echo 'Rebase failed. Starting subshell to resolve conflicts. Run "exit 0" if you successfully finished the rebase, or "exit 1" if you want to abort'; bash) || cleanup_and_die "${pull_id}"
 git checkout main
 git merge --squash --no-commit "merge-${pull_id}" || cleanup_and_die "${pull_id}"
-author_name_email="$(git log --format='%an <%ae>' "${base_branch}...merge-${pull_id}" | tail -1)"
+author_name_email="$(git log --format='%an <%ae>' "${base_branch_remote}/${base_branch}...${remote}/${branch}" | tail -1)"
 git branch -D "merge-${pull_id}"
 git commit --signoff --gpg-sign --author="$author_name_email" "${message_args[@]}"
