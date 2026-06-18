@@ -20,7 +20,7 @@ pushd "${BUILD_DIR}"
 export CC=gcc
 export CXX=g++
 export CFLAGS="${CFLAGS} -O3 -pipe -march=native -Wall -Wextra -pedantic -Wno-error -Wno-stringop-overflow ${OPT_HARDENED_FLAG}"
-export CXXFLAGS="${CXXFLAGS} -O3 -pipe -march=native -Wall -Wextra -pedantic -Wno-error -Wno-stringop-overflow ${OPT_HARDENED_FLAG} -include cstdint"
+export CXXFLAGS="${CXXFLAGS} -O3 -pipe -march=native -Wall -Wextra -pedantic -Wno-error -Wno-stringop-overflow ${OPT_HARDENED_FLAG}"
 GENERAL_FLAGS=" -DFORCE_COLORED_OUTPUT=ON -DAWS_ENABLE_UNITY_BUILD=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DFAIL_ON_WARNINGS=OFF -DMINIFI_ADVANCED_ASAN_BUILD=OFF -DMINIFI_ADVANCED_LINK_TIME_OPTIMIZATION=ON"
 GENERAL_FLAGS="${GENERAL_FLAGS} -DENABLE_SANDBOX=OFF"  # liblzma requires this with asan enabled. Doesn't affect the library, only the binaries
 EXTENSIONS="-DENABLE_AWS=ON -DENABLE_COUCHBASE=ON -DENABLE_GRPC_FOR_LOKI=ON -DENABLE_LUA_SCRIPTING=OFF"
