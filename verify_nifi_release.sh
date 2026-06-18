@@ -108,7 +108,11 @@ set +x
 README_SIZE="$(wc -c README | cut -d \  -f 1)"
 NOTICE_SIZE="$(wc -c NOTICE | cut -d \  -f 1)"
 LICENSE_SIZE="$(wc -c LICENSE | cut -d \  -f 1)"
-[ "$README_SIZE" -gt 4000 -a "$README_SIZE" -lt 6000 ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
+if [ "${VERSION_MAJOR}" -ge 2 -a "${VERSION_MINOR}" -ge 10 ]; then
+	[ "$README_SIZE" -gt 11000 -a "$README_SIZE" -lt 13000 ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
+else
+	[ "$README_SIZE" -gt 4000 -a "$README_SIZE" -lt 6000 ] && echo -e "${TERM_BGGREEN}README looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}README size looks off${TERM_RESET}" && exit 1)
+fi
 [ "$NOTICE_SIZE" -gt 95000 -a "$NOTICE_SIZE" -lt 120000 ] && echo -e "${TERM_BGGREEN}NOTICE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}NOTICE size looks off${TERM_RESET}" && exit 1)
 if [ "${VERSION_MAJOR}" -eq 2 -a "${VERSION_MINOR}" -ge 8 ]; then
 	[ "$LICENSE_SIZE" -gt 135000 -a "$LICENSE_SIZE" -lt 145000 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
