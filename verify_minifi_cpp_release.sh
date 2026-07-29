@@ -29,9 +29,8 @@ RC_PARENT_DIR_URL="$DIST_URL/dev/nifi/nifi-minifi-cpp"
 RC_DIR="$(svn ls "$RC_PARENT_DIR_URL" | tail -1)"
 [ -z "$RC_DIR" ] && echo -e "${TERM_BGRED}Missing RC directory${TERM_RESET}, check $RC_PARENT_DIR_URL" 1>&2 && exit 1
 RC_VERSION="$(echo "${RC_DIR}" | sed -r 's%/$%%')"
-SOURCE_DIR_NAME="nifi-minifi-cpp-${RC_VERSION}-source"
 
-TARBALL_NAME="${SOURCE_DIR_NAME}.tar.gz"
+TARBALL_NAME="nifi-minifi-cpp-${RC_VERSION}-source.tar.gz"
 SOURCE_URL="$RC_PARENT_DIR_URL/$RC_VERSION/$TARBALL_NAME"
 echo Downloading release candidate
 set -x
@@ -60,6 +59,13 @@ echo " GPG returned exit code: $?"
 
 echo -n "Extracting tarball... "
 tar xzf "$TARBALL_NAME"
+if [ -d "nifi-minifi-cpp-${RC_VERSION}-source" ]; then
+	SOURCE_DIR_NAME="nifi-minifi-cpp-${RC_VERSION}-source"
+elif [ -d "nifi-minifi-cpp-${RC_VERSION}" ]; then
+	SOURCE_DIR_NAME="nifi-minifi-cpp-${RC_VERSION}"
+else
+	echo "missing source directory, exiting" && exit 1
+fi
 pushd "${SOURCE_DIR_NAME}"
 touch .git  # workaround linter bug
 README_LOW=40000
