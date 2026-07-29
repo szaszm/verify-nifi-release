@@ -124,7 +124,7 @@ read
 
 echo "Build and test with Clang"
 set -x
-pushd "nifi-minifi-cpp-$RC_VERSION-source"
+pushd "${SOURCE_DIR_NAME}"
 time $SCRIPT_DIR/bin/minifi-cpp-build-clang-ninja.sh
 pushd build-clang-ninja
 ninja package
