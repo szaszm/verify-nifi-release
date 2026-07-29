@@ -29,8 +29,9 @@ RC_PARENT_DIR_URL="$DIST_URL/dev/nifi/nifi-minifi-cpp"
 RC_DIR="$(svn ls "$RC_PARENT_DIR_URL" | tail -1)"
 [ -z "$RC_DIR" ] && echo -e "${TERM_BGRED}Missing RC directory${TERM_RESET}, check $RC_PARENT_DIR_URL" 1>&2 && exit 1
 RC_VERSION="$(echo "${RC_DIR}" | sed -r 's%/$%%')"
+SOURCE_DIR_NAME="nifi-minifi-cpp-${RC_VERSION}-source"
 
-TARBALL_NAME="nifi-minifi-cpp-$RC_VERSION-source.tar.gz"
+TARBALL_NAME="${SOURCE_DIR_NAME}.tar.gz"
 SOURCE_URL="$RC_PARENT_DIR_URL/$RC_VERSION/$TARBALL_NAME"
 echo Downloading release candidate
 set -x
@@ -57,19 +58,16 @@ echo " gpg --verify $TARBALL_NAME.asc"
 gpg --verify "$TARBALL_NAME.asc"
 echo " GPG returned exit code: $?"
 
-# TODO:
-#echo "Running release-diff-checker to diff the source tarball and the git tag..."
-
 echo -n "Extracting tarball... "
 tar xzf "$TARBALL_NAME"
-pushd "nifi-minifi-cpp-$RC_VERSION-source"
+pushd "${SOURCE_DIR_NAME}"
 touch .git  # workaround linter bug
 README_LOW=40000
 README_HIGH=60000
 NOTICE_LOW=5500
 NOTICE_HIGH=7000
-LICENSE_LOW=175000
-LICENSE_HIGH=190000
+LICENSE_LOW=160000
+LICENSE_HIGH=170000
 README_SIZE="$(wc -c README.md | cut -d \  -f 1)"
 NOTICE_SIZE="$(wc -c NOTICE | cut -d \  -f 1)"
 LICENSE_SIZE="$(wc -c LICENSE | cut -d \  -f 1)"
@@ -79,8 +77,12 @@ LICENSE_SIZE="$(wc -c LICENSE | cut -d \  -f 1)"
 popd
 echo done
 
+echo -n "comparing the source tarball and the git tag...  "
+git clone --filter=blob:none --single-branch --branch "$GIT_TAG" "$GIT_REPO" temp-git-repo &>/dev/null
+diff -r --exclude=".git*" --exclude=".asf.yaml" --exclude="DEPENDENCIES" "temp-git-repo" "${SOURCE_DIR_NAME}" || (echo -e "comparing source tarball vs git tag: ${TERM_BGRED}DIFFERENT${TERM_RESET}  diff exit code: $?" && exit 1)
+echo -e "${TERM_BGGREEN}matching${TERM_RESET}  diff exit code: $?"
+
 echo "Checking git commit id..."
-git clone --filter=blob:none --no-checkout --single-branch --branch "${GIT_TAG}" https://github.com/apache/nifi-minifi-cpp.git temp-git-repo &>/dev/null
 pushd temp-git-repo &>/dev/null
 GIT_COMMIT_ID_ACTUAL="$(git log | head -1 | cut -d \  -f 2)"
 popd &>/dev/null
@@ -93,7 +95,7 @@ read
 
 echo "Build and test with GCC"
 set -x
-pushd "nifi-minifi-cpp-$RC_VERSION-source"
+pushd "${SOURCE_DIR_NAME}"
 time $SCRIPT_DIR/bin/minifi-cpp-build-gcc-ninja.sh
 pushd build-gcc-ninja
 ninja package
