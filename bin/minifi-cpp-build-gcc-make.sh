@@ -1,12 +1,14 @@
-#!/bin/sh
+#!/usr/bin/env bash
 set -ex
 set -o pipefail
+shopt -sq extglob
 
 BUILD_DIR="build-gcc-make"
 HARDENED=0
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-[ -f "$SCRIPT_DIR/build.env" ] && source "$SCRIPT_DIR/build.env"
+[ -f "${SCRIPT_DIR}/functions.sh" ] && source "${SCRIPT_DIR}/functions.sh"
+include_build_env
 
 if [ "${HARDENED}" -ne 0 ]; then
 	OPT_HARDENED_FLAG="-fhardened"
@@ -19,8 +21,8 @@ mkdir "${BUILD_DIR}"
 pushd "${BUILD_DIR}"
 export CC=gcc
 export CXX=g++
-export CFLAGS="${CFLAGS} -O3 -pipe -march=native -Wall -Wextra -pedantic -Wno-error -Wno-stringop-overflow ${OPT_HARDENED_FLAG}"
-export CXXFLAGS="${CXXFLAGS} -O3 -pipe -march=native -Wall -Wextra -pedantic -Wno-error -Wno-stringop-overflow ${OPT_HARDENED_FLAG}"
+export CFLAGS="${CFLAGS} -pipe -march=native -Wall -Wextra -pedantic -Wno-error -Wno-stringop-overflow ${OPT_HARDENED_FLAG}"
+export CXXFLAGS="${CXXFLAGS} -pipe -march=native -Wall -Wextra -pedantic -Wno-error -Wno-stringop-overflow ${OPT_HARDENED_FLAG}"
 GENERAL_FLAGS=" -DFORCE_COLORED_OUTPUT=ON -DAWS_ENABLE_UNITY_BUILD=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DFAIL_ON_WARNINGS=OFF -DMINIFI_ADVANCED_ASAN_BUILD=OFF -DMINIFI_ADVANCED_LINK_TIME_OPTIMIZATION=ON"
 GENERAL_FLAGS="${GENERAL_FLAGS} -DENABLE_SANDBOX=OFF"  # liblzma requires this with asan enabled. Doesn't affect the library, only the binaries
 EXTENSIONS="-DENABLE_AWS=ON -DENABLE_COUCHBASE=ON -DENABLE_GRPC_FOR_LOKI=ON -DENABLE_LUA_SCRIPTING=OFF"
