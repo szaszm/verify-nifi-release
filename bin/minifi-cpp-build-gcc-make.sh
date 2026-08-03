@@ -2,32 +2,31 @@
 set -ex
 set -o pipefail
 shopt -sq extglob
-
-BUILD_DIR="build-gcc-make"
-HARDENED=0
-
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 [ -f "${SCRIPT_DIR}/functions.sh" ] && source "${SCRIPT_DIR}/functions.sh"
+
+
+COMPILER=gcc
+GENERATOR=make
+BUILD_TYPE=RelWithDebInfo  # Debug|RelWithDebInfo|Release
+HARDENED=0
+BUILD_DIR="build-$(get_compiler_type "${COMPILER}")-${GENERATOR,,}"
+
+
 include_build_env
+remove_build_dir  # remove old
+setup_compiler_env "${COMPILER}"
 
-if [ "${HARDENED}" -ne 0 ]; then
-	OPT_HARDENED_FLAG="-fhardened"
-else
-	OPT_HARDENED_FLAG=""
-fi
+GENERAL_FLAGS=""
+GENERAL_FLAGS+=" -DAWS_ENABLE_UNITY_BUILD=OFF"  # unity build breaks rebuilds
+GENERAL_FLAGS+=" -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DFAIL_ON_WARNINGS=OFF"
+GENERAL_FLAGS+=" -DMINIFI_ADVANCED_LINK_TIME_OPTIMIZATION=ON"
+#GENERAL_FLAGS+=" -DMINIFI_ADVANCED_ASAN_BUILD=ON -DENABLE_SANDBOX=OFF"  # liblzma requires disabling its sandbox with asan. Doesn't affect the library, only the xz/lzma binaries, that we don't use
 
-rm -rf "${BUILD_DIR}"
-mkdir "${BUILD_DIR}"
-pushd "${BUILD_DIR}"
-export CC=gcc
-export CXX=g++
-export CFLAGS="${CFLAGS} -pipe -march=native -Wall -Wextra -pedantic -Wno-error -Wno-stringop-overflow ${OPT_HARDENED_FLAG}"
-export CXXFLAGS="${CXXFLAGS} -pipe -march=native -Wall -Wextra -pedantic -Wno-error -Wno-stringop-overflow ${OPT_HARDENED_FLAG}"
-GENERAL_FLAGS=" -DFORCE_COLORED_OUTPUT=ON -DAWS_ENABLE_UNITY_BUILD=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DFAIL_ON_WARNINGS=OFF -DMINIFI_ADVANCED_ASAN_BUILD=OFF -DMINIFI_ADVANCED_LINK_TIME_OPTIMIZATION=ON"
-GENERAL_FLAGS="${GENERAL_FLAGS} -DENABLE_SANDBOX=OFF"  # liblzma requires this with asan enabled. Doesn't affect the library, only the binaries
-EXTENSIONS="-DENABLE_AWS=ON -DENABLE_COUCHBASE=ON -DENABLE_GRPC_FOR_LOKI=ON -DENABLE_LUA_SCRIPTING=OFF"
-cmake "-DCMAKE_C_COMPILER=${CC}" "-DCMAKE_CXX_COMPILER=${CXX}" "-DCMAKE_C_FLAGS=${CFLAGS}" "-DCMAKE_CXX_FLAGS=${CXXFLAGS}" ${GENERAL_FLAGS} ${EXTENSIONS} ..
-nice -n 10 make -j$(nproc)
-make -j$(nproc) linter
-ctest -j8 --output-on-failure
-popd # "${BUILD_DIR}"
+#EXTENSIONS="-DENABLE_ALL=ON"  # the easy way to enable all, but won't let you override individual options
+
+# enable all extensions, separately to make it possible to disable individual ones
+EXTENSIONS="$(enable_all_extensions_cmake_flags)"
+EXTENSIONS+=" -DENABLE_LUA_SCRIPTING=OFF"  # lua 5.5 is unsupported by our sol2 version, comment out the line when using Lua <5.5
+
+run_build
