@@ -6,7 +6,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 [ -f "${SCRIPT_DIR}/functions.sh" ] && source "${SCRIPT_DIR}/functions.sh"
 
 
-COMPILER=$(try_commands gcc clang)
+COMPILER=
 GENERATOR=Ninja
 BUILD_TYPE=RelWithDebInfo  # Debug|RelWithDebInfo|Release
 HARDENED=0
@@ -14,6 +14,9 @@ BUILD_DIR=
 
 parse_opts "$@"
 
+if [ -z "${COMPILER}" ]; then
+	COMPILER=$(try_commands gcc clang)  # try to use gcc or clang if the compiler was not specified
+fi
 if [ -z "${BUILD_DIR}" ]; then
 	BUILD_DIR="build-$(get_compiler_type "${COMPILER}")-${GENERATOR,,}"
 fi
@@ -21,10 +24,6 @@ fi
 
 include_build_env
 remove_build_dir
-
-CFLAGS+=" "
-CXXFLAGS+=" -stdlib=libc++"
-
 setup_compiler_env "${COMPILER}"
 
 GENERAL_FLAGS=""
