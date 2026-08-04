@@ -60,7 +60,8 @@ echo " GPG returned exit code: $?"
 
 echo -n "Extracting tarball... "
 7z x "$TARBALL_NAME"
-pushd "nifi-$RC_VERSION"
+SOURCE_DIR_NAME="nifi-${RC_VERSION}"
+pushd "${SOURCE_DIR_NAME}"
 README_SIZE="$(wc -c README.md | cut -d \  -f 1)"
 NOTICE_SIZE="$(wc -c NOTICE | cut -d \  -f 1)"
 LICENSE_SIZE="$(wc -c LICENSE | cut -d \  -f 1)"
@@ -83,11 +84,13 @@ fi
 popd # nifi-$RC_VERSION
 echo done
 
-# TODO:
-#echo "Running release-diff-checker to diff the source tarball and the git tag..."
+echo -n "comparing the source tarball and the git tag...  "
+git clone --filter=blob:none --single-branch --branch "$GIT_TAG" "$GIT_REPO" temp-git-repo &>/dev/null
+diff -r --exclude=".git*" --exclude=".asf.yaml" --exclude="DEPENDENCIES" "temp-git-repo" "${SOURCE_DIR_NAME}" \
+	&& (echo -e "${TERM_BGGREEN}matching${TERM_RESET}  diff exit code: $?") \
+	|| (echo -e "comparing source tarball vs git tag: ${TERM_BGRED}DIFFERENT${TERM_RESET}  diff exit code: $?  (Ctrl-C to exit, enter to continue)" && read)
 
 echo "Checking git commit id..."
-git clone --filter=blob:none --no-checkout --single-branch --branch $GIT_TAG https://github.com/apache/nifi.git temp-git-repo &>/dev/null
 pushd temp-git-repo &>/dev/null
 GIT_COMMIT_ID_ACTUAL="$(git log | head -1 | cut -d \  -f 2)"
 popd &>/dev/null
@@ -100,10 +103,10 @@ read
 
 echo "Build and test"
 set -x
-pushd "nifi-$RC_VERSION"
+pushd "${SOURCE_DIR_NAME}"
 ./mvnw -T 1C clean package -Pcontrib-check #-DskipTests
 unzip nifi-assembly/target/nifi-$RC_VERSION-bin.zip
-pushd nifi-$RC_VERSION
+pushd "${SOURCE_DIR_NAME}"
 set +x
 README_SIZE="$(wc -c README | cut -d \  -f 1)"
 NOTICE_SIZE="$(wc -c NOTICE | cut -d \  -f 1)"
