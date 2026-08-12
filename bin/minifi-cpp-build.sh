@@ -28,8 +28,9 @@ setup_compiler_env "${COMPILER}"
 
 GENERAL_FLAGS=""
 GENERAL_FLAGS+=" -DAWS_ENABLE_UNITY_BUILD=OFF"  # unity build breaks rebuilds
-GENERAL_FLAGS+=" -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DFAIL_ON_WARNINGS=OFF"
-GENERAL_FLAGS+=" -DMINIFI_ADVANCED_LINK_TIME_OPTIMIZATION=ON"
+GENERAL_FLAGS+=" -DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
+#GENERAL_FLAGS+=" -DMINIFI_FAIL_ON_WARNINGS=ON"
+#GENERAL_FLAGS+=" -DMINIFI_ADVANCED_LINK_TIME_OPTIMIZATION=ON"  # many envs are broken with LTO
 #GENERAL_FLAGS+=" -DMINIFI_ADVANCED_ASAN_BUILD=ON -DENABLE_SANDBOX=OFF"  # liblzma requires disabling its sandbox with asan. Doesn't affect the library, only the xz/lzma binaries, that we don't use
 
 #EXTENSIONS="-DENABLE_ALL=ON"  # the easy way to enable all, but won't let you override individual options
@@ -37,5 +38,7 @@ GENERAL_FLAGS+=" -DMINIFI_ADVANCED_LINK_TIME_OPTIMIZATION=ON"
 # enable all extensions, separately to make it possible to disable individual ones
 EXTENSIONS="$(enable_all_extensions_cmake_flags)"
 EXTENSIONS+=" -DENABLE_LUA_SCRIPTING=OFF"  # lua 5.5 is unsupported by our sol2 version, comment out the line when using Lua <5.5
+EXTENSIONS+=" -DMINIFI_RUST=ON"  # rust stuff is disabled by default qwq
+#EXTENSIONS+=" -DENABLE_GRPC_FOR_LOKI=OFF"  # heavy bloated feature, and fails on clang/libstdc++/LTO
 
 run_build
