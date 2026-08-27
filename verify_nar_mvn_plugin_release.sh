@@ -96,4 +96,16 @@ LICENSE_SIZE="$(wc -c META-INF/LICENSE | cut -d \  -f 1)"
 [ "$LICENSE_SIZE" -gt 10000 -a "$LICENSE_SIZE" -lt 12500 ] && echo -e "${TERM_BGGREEN}LICENSE looks reasonable${TERM_RESET}" || (echo -e "${TERM_BGRED}LICENSE size looks off${TERM_RESET}" && exit 1)
 popd # nifi-nar-maven-plugin-$RC_VERSION (src)
 
+echo "${TERM_BGGREEN}NAR mvn plugin build success${TERM_RESET}, building NiFi with the new plugin version"
+set -x
+git clone --depth=1 https://github.com/apache/nifi.git nifi_repo
+pushd nifi_repo
+sed -ri -e 's%<nifi\.nar\.maven\.plugin\.version>[0-9]+\.[0-9]+\.[0-9]+</nifi\.nar\.maven\.plugin\.version>%<nifi.nar.maven.plugin.version>'"${VERSION}"'</nifi.nar.maven.plugin.version>%' pom.xml
+git diff
+echo Press enter to continue building NiFi with the new plugin version
+read
+./mvnw -T 1C clean package -Pcontrib-check #-DskipTests
+set +x
+popd # nifi_repo
+
 popd # WORKING_DIR
