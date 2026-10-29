@@ -6,7 +6,7 @@ GIT_TAG=$1
 GIT_COMMIT_ID=$2
 SHA512=$3
 
-[ $# -ne 3 ] && echo "Usage: $0 GIT_TAG GIT_COMMIT_ID SHA512" && exit 1
+[ $# -lt 2 ] && echo "Usage: $0 GIT_TAG GIT_COMMIT_ID [SHA512]" && exit 1
 
 SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 WORKING_DIR=work
@@ -33,25 +33,34 @@ RC_VERSION="$(echo "${RC_DIR}" | sed -r 's%/$%%')"
 TARBALL_NAME="nifi-minifi-cpp-${RC_VERSION}-source.tar.gz"
 SOURCE_URL="$RC_PARENT_DIR_URL/$RC_VERSION/$TARBALL_NAME"
 echo Downloading release candidate
+HAS_SHA256=true
+HAS_SHA512=true
 set -x
 wget -q "$SOURCE_URL"
 wget -q "$SOURCE_URL.asc"
-wget -q "$SOURCE_URL.sha256"
-wget -q "$SOURCE_URL.sha512"
+wget -q "$SOURCE_URL.sha256" || HAS_SHA256=false
+wget -q "$SOURCE_URL.sha512" || HAS_SHA512=false
+[ "${HAS_SHA256}" = "false" -a "${HAS_SHA512}" = "false" ] && echo -e "Must have at least one of SHA256 or SHA512" && exit 1
 set +x
 
 echo Checking checksums
 SOURCE_SHA256="$(sha256sum "$TARBALL_NAME" | cut -d \  -f 1)"
 SOURCE_SHA512="$(sha512sum "$TARBALL_NAME" | cut -d \  -f 1)"
-DOWNLOADED_SHA256="$(cat "$TARBALL_NAME.sha256")"
-DOWNLOADED_SHA512="$(cat "$TARBALL_NAME.sha512")"
+DOWNLOADED_SHA256="$([ "${HAS_SHA256}" = "true" ] && cat "$TARBALL_NAME.sha256" | cut -d \  -f 1 || :)"
+DOWNLOADED_SHA512="$([ "${HAS_SHA512}" = "true" ] && cat "$TARBALL_NAME.sha512" | cut -d \  -f 1 || :)"
 
-echo -n " SHA256: (expected) $DOWNLOADED_SHA256 <=> $SOURCE_SHA256 (actual)  = "
-[ -n "$SOURCE_SHA256" -a "$SOURCE_SHA256" = "$DOWNLOADED_SHA256" ] && echo -e ${TERM_BGGREEN}matching${TERM_RESET} || (echo -e ${TERM_BGRED}DIFFERENT${TERM_RESET} && exit 1)
-echo -n " SHA512: (expected) $DOWNLOADED_SHA512 <=> $SOURCE_SHA512 (actual)  = "
-[ -n "$SOURCE_SHA512" -a "$SOURCE_SHA512" = "$DOWNLOADED_SHA512" ] && echo -e ${TERM_BGGREEN}matching${TERM_RESET} || (echo -e ${TERM_BGRED}DIFFERENT${TERM_RESET} && exit 1)
-echo -n " SHA512 (email): (expected) $SHA512 <=> $SOURCE_SHA512 (actual)  = "
-[ -n "$SOURCE_SHA512" -a "$SOURCE_SHA512" = "$SHA512" ] && echo -e ${TERM_BGGREEN}matching${TERM_RESET} || (echo -e ${TERM_BGRED}DIFFERENT${TERM_RESET} && exit 1)
+if [ "${HAS_SHA256}" = "true" ]; then
+	echo -n " SHA256: (expected) $DOWNLOADED_SHA256 <=> $SOURCE_SHA256 (actual)  = "
+	[ -n "$SOURCE_SHA256" -a "$SOURCE_SHA256" = "$DOWNLOADED_SHA256" ] && echo -e ${TERM_BGGREEN}matching${TERM_RESET} || (echo -e ${TERM_BGRED}DIFFERENT${TERM_RESET} && exit 1)
+fi
+if [ "${HAS_SHA512}" = "true" ]; then
+	echo -n " SHA512: (expected) $DOWNLOADED_SHA512 <=> $SOURCE_SHA512 (actual)  = "
+	[ -n "$SOURCE_SHA512" -a "$SOURCE_SHA512" = "$DOWNLOADED_SHA512" ] && echo -e ${TERM_BGGREEN}matching${TERM_RESET} || (echo -e ${TERM_BGRED}DIFFERENT${TERM_RESET} && exit 1)
+fi
+if [ -n "${SHA512}" ]; then
+	echo -n " SHA512 (email): (expected) $SHA512 <=> $SOURCE_SHA512 (actual)  = "
+	[ -n "$SOURCE_SHA512" -a "$SOURCE_SHA512" = "$SHA512" ] && echo -e ${TERM_BGGREEN}matching${TERM_RESET} || (echo -e ${TERM_BGRED}DIFFERENT${TERM_RESET} && exit 1)
+fi
 
 echo " gpg --verify $TARBALL_NAME.asc"
 gpg --verify "$TARBALL_NAME.asc"
@@ -84,7 +93,7 @@ popd
 echo done
 
 echo -n "comparing the source tarball and the git tag...  "
-git clone --filter=blob:none --single-branch --branch "$GIT_TAG" "$GIT_REPO" temp-git-repo &>/dev/null
+git clone --filter=blob:none --single-branch --branch "$GIT_TAG" "$GIT_REPO" temp-git-repo 1>/dev/null
 diff -r --exclude=".git*" --exclude=".asf.yaml" --exclude="DEPENDENCIES" "temp-git-repo" "${SOURCE_DIR_NAME}" || (echo -e "comparing source tarball vs git tag: ${TERM_BGRED}DIFFERENT${TERM_RESET}  diff exit code: $?" && exit 1)
 echo -e "${TERM_BGGREEN}matching${TERM_RESET}  diff exit code: $?"
 
